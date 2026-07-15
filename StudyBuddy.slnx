@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="StudyBuddy.API/StudyBuddy.API.csproj" />
+  <Project Path="StudyBuddy.BLL/StudyBuddy.BLL.csproj" />
+  <Project Path="StudyBuddy.DAL/StudyBuddy.DAL.csproj" />
+  <Project Path="StudyBuddy.Models/StudyBuddy.Models.csproj" />
+</Solution>
