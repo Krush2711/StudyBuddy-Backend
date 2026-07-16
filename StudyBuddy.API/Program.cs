@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using StudyBuddy.DAL.Context;
+
 
 namespace StudyBuddy.API
 {
@@ -6,7 +9,11 @@ namespace StudyBuddy.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -25,7 +32,7 @@ namespace StudyBuddy.API
 
             app.UseAuthorization();
 
-
+            
             app.MapControllers();
 
             app.Run();
