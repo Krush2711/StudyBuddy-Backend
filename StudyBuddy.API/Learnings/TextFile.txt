@@ -1,0 +1,13 @@
+﻿1) Microsoft.Extensions.Identity.Core -> manytools inside it , 
+Identity
+├── Password Hashing
+├── Login Manager
+├── User Manager
+├── Roles
+├── Claims
+├── Cookies
+├── Email Confirmation
+├── 2FA
+└── Identity UI
+
+--------------------------------------------------------------------------------------------------------------------------------
