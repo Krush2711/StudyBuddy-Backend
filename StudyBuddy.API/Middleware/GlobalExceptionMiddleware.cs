@@ -13,43 +13,39 @@ public class GlobalExceptionMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task Invoke(HttpContext context)
     {
+        Console.WriteLine("===== MIDDLEWARE STARTED =====");
+
         try
         {
             await _next(context);
         }
         catch (DuplicateEmailException ex)
         {
-            await HandleExceptionAsync(
-                context,
-                HttpStatusCode.Conflict,
-                ex.Message);
+            Console.WriteLine("===== DUPLICATE EMAIL CAUGHT =====");
+
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = ex.Message
+            }));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await HandleExceptionAsync(
-                context,
-                HttpStatusCode.InternalServerError,
-                "Something went wrong.");
+            Console.WriteLine(ex);
+
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = ex.Message
+            }));
         }
-    }
-
-    private static async Task HandleExceptionAsync(
-        HttpContext context,
-        HttpStatusCode statusCode,
-        string message)
-    {
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)statusCode;
-
-        var response = new
-        {
-            Success = false,
-            Message = message
-        };
-
-        await context.Response.WriteAsync(
-            JsonSerializer.Serialize(response));
     }
 }
