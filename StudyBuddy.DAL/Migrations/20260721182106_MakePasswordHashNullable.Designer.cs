@@ -12,8 +12,8 @@ using StudyBuddy.DAL.Context;
 namespace StudyBuddy.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260719174205_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260721182106_MakePasswordHashNullable")]
+    partial class MakePasswordHashNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,10 @@ namespace StudyBuddy.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AuthenticationProvider")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -44,6 +48,9 @@ namespace StudyBuddy.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("GoogleId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsEmailVerified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -55,7 +62,6 @@ namespace StudyBuddy.DAL.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")

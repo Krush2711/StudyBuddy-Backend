@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudyBuddy.BLL.DTOs.Auths;
 using StudyBuddy.BLL.DTOs.Auths.Login;
 using StudyBuddy.BLL.Interfaces.Auth;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+
 
 
 namespace StudyBuddy.API.Controllers
@@ -48,10 +51,30 @@ namespace StudyBuddy.API.Controllers
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        [HttpGet("api/google-callback")]
-        public IActionResult GoogleResponse()
+        [HttpGet("google-response")]
+        public async Task<IActionResult> GoogleResponse()
         {
-            return Ok("Google callback reached.");
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("Google authentication failed.");
+            }
+
+            var claims = result.Principal!.Claims;
+
+            var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+;            var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var googleId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email)  || string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Required Google claims are missing.");
+            }
+            var response = await _authService.GoogleLoginAsync(googleId, email, name);
+
+            return Ok(response);
+
 
         }
 

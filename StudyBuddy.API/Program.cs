@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using StudyBuddy.API.Middleware;
 using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.BLL.Services;
@@ -8,10 +12,7 @@ using StudyBuddy.DAL.Context;
 using StudyBuddy.DAL.Interfaces.Auth;
 using StudyBuddy.DAL.Repositories;
 using StudyBuddy.Models.Confugrations;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi;
 namespace StudyBuddy.API
 {
     public class Program
@@ -59,7 +60,10 @@ namespace StudyBuddy.API
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
             })
+                .AddCookie()
                      .AddJwtBearer(options =>
                     {
                         options.TokenValidationParameters =

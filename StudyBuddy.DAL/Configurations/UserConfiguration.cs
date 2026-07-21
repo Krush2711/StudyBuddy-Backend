@@ -17,7 +17,7 @@ namespace StudyBuddy.DAL.Configurations
             builder.Property(x => x.FullName).IsRequired().HasMaxLength(100);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(100);
             builder.HasIndex(x => x.Email).IsUnique();
-            builder.Property(x => x.PasswordHash).IsRequired();
+            builder.Property(x => x.PasswordHash);
             builder.Property(x => x.profileImageUrl).HasMaxLength(500);
             builder.Property(x => x.Isactive).HasDefaultValue(false);
             builder.Property(x => x.IsEmailVerified).HasDefaultValue(false);

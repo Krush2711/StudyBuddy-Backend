@@ -10,5 +10,7 @@ namespace StudyBuddy.BLL.Interfaces.Auth
     {
         Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<LoginResponceDto> LoginAsync(LoginRequestDto request);
+
+        Task<LoginResponceDto> GoogleLoginAsync(string googleId, string email,string name);
     }
 }
