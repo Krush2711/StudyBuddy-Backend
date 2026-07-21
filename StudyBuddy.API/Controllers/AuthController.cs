@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using StudyBuddy.BLL.Interfaces.Auth;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StudyBuddy.BLL.DTOs.Auths;
+using StudyBuddy.BLL.DTOs.Auths.Login;
+using StudyBuddy.BLL.Interfaces.Auth;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 
 
 namespace StudyBuddy.API.Controllers
@@ -18,7 +22,7 @@ namespace StudyBuddy.API.Controllers
         }
 
         
-        [HttpPost("api/v1/auth")]
+        [HttpPost("api/auth")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
             var responce = await _authService.RegisterAsync(request);
@@ -26,18 +30,36 @@ namespace StudyBuddy.API.Controllers
             return Ok(responce);
         }
 
-        //public async Task<IActionResult> Register(RegisterRequestDto request)
-        //{
-        //    try
-        //    {
-        //        var response = await _authService.RegisterAsync(request);
-        //        return Ok(response);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
+        [HttpPost("api/login")]  
+        public async Task<IActionResult> Login(LoginRequestDto request)
+        {
+            var responce = await _authService.LoginAsync(request);
+            return Ok(responce);
+        }
+        [HttpGet("api/login-google")]
+        public IActionResult GoogleLogin()
+        {
+            var properties = new AuthenticationProperties
+            {
 
+                RedirectUri = Url.Action(nameof(GoogleResponse))
+            };
+
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("api/google-callback")]
+        public IActionResult GoogleResponse()
+        {
+            return Ok("Google callback reached.");
+
+        }
+
+        [Authorize]
+        [HttpGet("api/profile")]
+        public IActionResult GetProfile()
+        {
+            return Ok("Authenticated");
+        }
     }
 }

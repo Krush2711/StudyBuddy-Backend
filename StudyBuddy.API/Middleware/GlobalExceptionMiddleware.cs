@@ -34,6 +34,17 @@ public class GlobalExceptionMiddleware
                 message = ex.Message
             }));
         }
+        catch (InvalidCredentialsException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = ex.Message
+            }));
+        }
         catch (Exception ex)
         {
             Console.WriteLine(ex);

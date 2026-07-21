@@ -10,7 +10,9 @@ namespace StudyBuddy.Models.Entities
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         //public int Id { get; set; } 
-        public string PasswordHash { get; set; } = string.Empty;
+        public string? PasswordHash { get; set; } = string.Empty;
+
+        public string? GoogleId { get; set; }
         public bool Isactive { get; set; } = true;
 
         public bool IsEmailVerified { get; set; } = false;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using StudyBuddy.BLL.DTOs.Auths;
+using StudyBuddy.BLL.DTOs.Auths.Login;
 using StudyBuddy.BLL.Exceptions;
 using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.DAL.Interfaces.Auth;
@@ -19,11 +20,12 @@ namespace StudyBuddy.BLL.Services.Add
     {
         private readonly IAuthRepository _authRepository;
         private readonly PasswordHasher<User> _passwordHasher;
-        
-        public AuthService(IAuthRepository repository)
+        private readonly ITokenService _tokenService;
+        public AuthService(IAuthRepository repository, ITokenService tokenService)
         {
             _authRepository = repository;
             _passwordHasher = new PasswordHasher<User>();
+            _tokenService = tokenService;
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -51,6 +53,36 @@ namespace StudyBuddy.BLL.Services.Add
                 FullName = createdUser.FullName,
                 Email = createdUser.Email
             };
+
+
+        }
+
+        public async Task<LoginResponceDto> LoginAsync(LoginRequestDto request)
+        {
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+
+            if ( user == null)
+            {
+                  throw new InvalidCredentialsException();
+            }
+
+            //bool isPasswordValid = _passwordHasher.VerifyHashedPassword(User, User.PasswordHash, request.Password) == PasswordVerificationResult.Success;
+            var result = _passwordHasher.VerifyHashedPassword(
+                            user,
+                            user.PasswordHash,
+                            request.Password);
+
+            if (result != PasswordVerificationResult.Success)
+            {
+                throw new InvalidCredentialsException();
+            }
+            return (new LoginResponceDto
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                Token = _tokenService.GenerateToken(user)
+            });
         }
     }
 }

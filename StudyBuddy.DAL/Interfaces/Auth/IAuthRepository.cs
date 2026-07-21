@@ -9,5 +9,7 @@ namespace StudyBuddy.DAL.Interfaces.Auth
     {
         Task<bool> EmailExistsAsync(string email);
         Task<User> CreateUSerAsync(User user);
+        Task<User?> GetUserByEmailAsync(string email);
+
     }
 }

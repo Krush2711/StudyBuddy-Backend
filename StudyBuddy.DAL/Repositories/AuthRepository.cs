@@ -28,5 +28,10 @@ namespace StudyBuddy.DAL.Repositories
             await _context.SaveChangesAsync(); // This is where the database is actually updated.
             return user;
         }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email); // getting user 
+        }
     }
 }
