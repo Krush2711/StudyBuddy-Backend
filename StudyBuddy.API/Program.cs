@@ -8,11 +8,15 @@ using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.BLL.Services;
 using StudyBuddy.BLL.Services.Add;
 using StudyBuddy.BLL.Services.Auth;
+using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.DAL.Context;
 using StudyBuddy.DAL.Interfaces.Auth;
 using StudyBuddy.DAL.Repositories;
+using StudyBuddy.DAL.Interfaces;
 using StudyBuddy.Models.Confugrations;
 using System.Text;
+using StudyBuddy.DAL.Repositories.Interfaces;
+
 namespace StudyBuddy.API
 {
     public class Program
@@ -28,7 +32,8 @@ namespace StudyBuddy.API
             // Add services to the container.
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
 
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -92,6 +97,9 @@ namespace StudyBuddy.API
 
                              options.ClientSecret =
                                  builder.Configuration["Authentication:Google:ClientSecret"]!;
+
+
+                             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                          });
 
 

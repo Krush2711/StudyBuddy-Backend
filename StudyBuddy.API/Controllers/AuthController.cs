@@ -78,11 +78,11 @@ namespace StudyBuddy.API.Controllers
 
         }
 
-        [Authorize]
-        [HttpGet("api/profile")]
-        public IActionResult GetProfile()
-        {
-            return Ok("Authenticated");
-        }
+        //[Authorize]
+        //[HttpGet("api/profile")]
+        //public IActionResult GetProfile()
+        //{
+        //    return Ok("Authenticated");
+        //}
     }
 }
