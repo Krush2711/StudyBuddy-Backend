@@ -34,10 +34,14 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
-
-
+            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+            builder.Services.AddScoped<IRawDocumentRepository, RawDocumentRepository>();
+            builder.Services.AddScoped<IStoredFileRepository, StoredFileRepository>();
+            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+            builder.Services.AddScoped<IRawDocumentService, RawDocumentService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddControllers();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -65,59 +69,53 @@ namespace StudyBuddy.API
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddCookie()
-                     .AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters =
-                            new TokenValidationParameters
-                            {
-                                ValidateIssuer = true,
-                                ValidateAudience = true,
-                                ValidateLifetime = true,
-                                ValidateIssuerSigningKey = true,
+             .AddJwtBearer(options =>
+             {
+                 options.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidateLifetime = true,
+                     ValidateIssuerSigningKey = true,
 
-                                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                                ValidAudience = builder.Configuration["Jwt:Audience"],
+                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                     ValidAudience = builder.Configuration["Jwt:Audience"],
 
-                                IssuerSigningKey =
-                                    new SymmetricSecurityKey(
-                                        Encoding.UTF8.GetBytes(
-                                            builder.Configuration["Jwt:Key"]!))
-                            };
+                     IssuerSigningKey = new SymmetricSecurityKey(
+                         Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+                 };
+             })
+             .AddCookie()
+             .AddGoogle(options =>
+             {
+                 options.ClientId =
+                     builder.Configuration["Authentication:Google:ClientId"]!;
 
+                 options.ClientSecret =
+                     builder.Configuration["Authentication:Google:ClientSecret"]!;
 
-                    })
-                        .AddGoogle(options =>
-                         {
-                             options.ClientId =
-                                 builder.Configuration["Authentication:Google:ClientId"]!;
-
-                             options.ClientSecret =
-                                 builder.Configuration["Authentication:Google:ClientSecret"]!;
-
-
-                             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                         });
-
+                 options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+             });
+            builder.Services.AddAuthorization();
 
 
             var app = builder.Build();
-            app.UseMiddleware<GlobalExceptionMiddleware>();
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+                        app.UseMiddleware<GlobalExceptionMiddleware>();
+                        // Configure the HTTP request pipeline.
+                        if (app.Environment.IsDevelopment())
+                        {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            
+
             app.MapControllers();
 
             app.Run();

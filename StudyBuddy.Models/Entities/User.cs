@@ -20,5 +20,7 @@ namespace StudyBuddy.Models.Entities
 
         public string AuthenticationProvider { get; set; } = "Local";
 
+        public ICollection<RawDocument> RawDocuments { get; set; } = new List<RawDocument>();
+
     }
 }

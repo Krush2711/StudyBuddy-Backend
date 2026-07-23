@@ -2,61 +2,79 @@
 using System.Text.Json;
 using StudyBuddy.BLL.Exceptions;
 
-namespace StudyBuddy.API.Middleware;
-
-public class GlobalExceptionMiddleware
+namespace StudyBuddy.API.Middleware
 {
-    private readonly RequestDelegate _next;
-
-    public GlobalExceptionMiddleware(RequestDelegate next)
+    public class GlobalExceptionMiddleware
     {
-        _next = next;
-    }
+        private readonly RequestDelegate _next;
 
-    public async Task Invoke(HttpContext context)
-    {
-        Console.WriteLine("===== MIDDLEWARE STARTED =====");
-
-        try
+        public GlobalExceptionMiddleware(RequestDelegate next)
         {
-            await _next(context);
+            _next = next;
         }
-        catch (DuplicateEmailException ex)
-        {
-            Console.WriteLine("===== DUPLICATE EMAIL CAUGHT =====");
 
-            context.Response.StatusCode = StatusCodes.Status409Conflict;
+        public async Task Invoke(HttpContext context)
+        {
+            try
+            {
+                await _next(context);
+            }
+            catch (DuplicateEmailException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.Conflict,
+                    ex.Message);
+            }
+            catch (InvalidCredentialsException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.Unauthorized,
+                    ex.Message);
+            }
+            catch (UserNotFoundException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.NotFound,
+                    ex.Message);
+            }
+            //catch (ExternalAuthenticationException ex)
+            //{
+            //    await HandleExceptionAsync(
+            //        context,
+            //        HttpStatusCode.Unauthorized,
+            //        ex.Message);
+            //}
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.InternalServerError,
+                    "Something went wrong. Please try again later.");
+            }
+        }
+
+        private static async Task HandleExceptionAsync(
+            HttpContext context,
+            HttpStatusCode statusCode,
+            string message)
+        {
+            context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "application/json";
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            var response = new
             {
                 success = false,
-                message = ex.Message
-            }));
-        }
-        catch (InvalidCredentialsException ex)
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            context.Response.ContentType = "application/json";
+                statusCode = (int)statusCode,
+                message = message
+            };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new
-            {
-                success = false,
-                message = ex.Message
-            }));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json";
-
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new
-            {
-                success = false,
-                message = ex.Message
-            }));
+            await context.Response.WriteAsync(
+                JsonSerializer.Serialize(response));
         }
     }
 }

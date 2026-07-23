@@ -1,4 +1,5 @@
 ﻿using StudyBuddy.BLL.DTOs.User;
+using StudyBuddy.BLL.Exceptions;
 using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.DAL.Repositories.Interfaces;
 
@@ -18,7 +19,9 @@ namespace StudyBuddy.BLL.Services
             var user = await _userRepository.GetUserByIdAsync(userId);
 
             if (user == null)
-                throw new Exception("User not found.");
+            {
+                throw new UserNotFoundException(userId);
+            }
 
             return new UserProfileDto
             {
@@ -36,7 +39,9 @@ namespace StudyBuddy.BLL.Services
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+            {
+                throw new UserNotFoundException(userId);
+            }
 
             user.FullName = request.fullName;
             user.profileImageUrl = request.profileImageUrl;

@@ -12,6 +12,9 @@ namespace StudyBuddy.DAL.Context
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
         public DbSet<User> Users => Set<User>();
+        public DbSet<StoredFile> StoredFiles { get; set; }
+
+        public DbSet<RawDocument> RawDocuments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
