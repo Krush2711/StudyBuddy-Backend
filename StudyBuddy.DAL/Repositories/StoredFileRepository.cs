@@ -21,5 +21,10 @@ namespace StudyBuddy.DAL.Repositories
 
             return storedFile;
         }
+        public async Task<StoredFile?> GetByIdAsync(Guid id)
+        {
+            return await _context.StoredFiles
+                .FindAsync( id);
+        }
     }
 }

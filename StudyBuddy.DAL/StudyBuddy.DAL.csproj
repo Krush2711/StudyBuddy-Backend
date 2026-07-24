@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StudyBuddy.Models\StudyBuddy.Models.csproj" />
+    <ProjectReference Include="..\StudyBuddy.Processor\StudyBuddy.Processor.csproj" />
   </ItemGroup>
 
 </Project>

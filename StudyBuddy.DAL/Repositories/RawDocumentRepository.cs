@@ -27,5 +27,12 @@ namespace StudyBuddy.DAL.Repositories
         {
             return await _context.RawDocuments.FindAsync(id);
         }
+
+      
+        public async Task UpdateAsync(RawDocument rawDocument)
+        {
+            _context.RawDocuments.Update(rawDocument);
+            await _context.SaveChangesAsync();
+        }
     }
 }

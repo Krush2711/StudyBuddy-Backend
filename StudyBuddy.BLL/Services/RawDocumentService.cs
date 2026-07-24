@@ -10,15 +10,17 @@ namespace StudyBuddy.BLL.Services
         private readonly IRawDocumentRepository _rawRepository;
         private readonly IStoredFileRepository _storedFileRepository;
         private readonly IFileStorageService _fileStorageService;
-
+        private readonly IDocumentProcessingService _documentProcessingService;
         public RawDocumentService(
             IRawDocumentRepository rawRepository,
             IStoredFileRepository storedFileRepository,
-            IFileStorageService fileStorageService)
+            IFileStorageService fileStorageService,
+            IDocumentProcessingService documentProcessingService)
         {
             _rawRepository = rawRepository;
             _storedFileRepository = storedFileRepository;
             _fileStorageService = fileStorageService;
+            _documentProcessingService = documentProcessingService;
         }
 
         public async Task<RawDocumentResponseDto> UploadAsync(
@@ -78,6 +80,7 @@ namespace StudyBuddy.BLL.Services
             };
 
             await _rawRepository.AddAsync(rawDocument);
+            await _documentProcessingService.ProcessAsync(rawDocument.Id);
 
             return new RawDocumentResponseDto
             {

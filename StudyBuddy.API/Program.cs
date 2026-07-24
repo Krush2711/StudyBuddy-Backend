@@ -4,18 +4,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using StudyBuddy.API.Middleware;
+using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.BLL.Services;
 using StudyBuddy.BLL.Services.Add;
 using StudyBuddy.BLL.Services.Auth;
-using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.DAL.Context;
+using StudyBuddy.DAL.Interfaces;
 using StudyBuddy.DAL.Interfaces.Auth;
 using StudyBuddy.DAL.Repositories;
-using StudyBuddy.DAL.Interfaces;
-using StudyBuddy.Models.Confugrations;
-using System.Text;
 using StudyBuddy.DAL.Repositories.Interfaces;
+using StudyBuddy.Models.Confugrations;
+using StudyBuddy.Processor.Factory;
+using StudyBuddy.Processor.Interfaces;
+using StudyBuddy.Processor.Processors;
+using StudyBuddy.Processor.Services;
+using System.Text;
 
 namespace StudyBuddy.API
 {
@@ -41,6 +45,12 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IRawDocumentService, RawDocumentService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddControllers();
+            builder.Services.AddScoped<IProcesser, TextProcessor>();
+            builder.Services.AddScoped<IProcessorFactory, ProcessorFactory>();
+            builder.Services.AddScoped<IProcessingPipeline, ProcessingPipeline>();
+            builder.Services.AddScoped<ProcessingPipeline>();
+            builder.Services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
+
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();

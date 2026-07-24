@@ -27,6 +27,7 @@
     <ProjectReference Include="..\StudyBuddy.BLL\StudyBuddy.BLL.csproj" />
     <ProjectReference Include="..\StudyBuddy.DAL\StudyBuddy.DAL.csproj" />
     <ProjectReference Include="..\StudyBuddy.Models\StudyBuddy.Models.csproj" />
+    <ProjectReference Include="..\StudyBuddy.Processor\StudyBuddy.Processor.csproj" />
   </ItemGroup>
 
 </Project>

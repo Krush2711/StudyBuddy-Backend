@@ -11,5 +11,7 @@ namespace StudyBuddy.DAL.Interfaces
 
         Task<RawDocument?> GetByIdAsync(Guid id);
 
+        Task UpdateAsync(RawDocument rawDocument);
+
     }
 }
