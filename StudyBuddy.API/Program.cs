@@ -52,6 +52,8 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IProcesser, SourceCodeProcessor>();
             builder.Services.AddScoped<ProcessingPipeline>();
             builder.Services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
+            builder.Services.AddScoped<IImageOcrService, TesseractOcrService>();
+            builder.Services.AddScoped<IProcesser, ImageProcessor>();
 
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
