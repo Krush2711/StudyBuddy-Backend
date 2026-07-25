@@ -48,6 +48,8 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IProcesser, TextProcessor>();
             builder.Services.AddScoped<IProcessorFactory, ProcessorFactory>();
             builder.Services.AddScoped<IProcessingPipeline, ProcessingPipeline>();
+            builder.Services.AddScoped<IProcesser, PdfProcessor>();
+            builder.Services.AddScoped<IProcesser, SourceCodeProcessor>();
             builder.Services.AddScoped<ProcessingPipeline>();
             builder.Services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
 

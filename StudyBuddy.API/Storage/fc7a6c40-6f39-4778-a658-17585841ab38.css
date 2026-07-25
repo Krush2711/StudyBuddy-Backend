@@ -1,0 +1,30 @@
+:root {
+
+    --bg-primary: #F5E6D3;
+    --bg-secondary: #E6D0B8;
+
+    --primary: #8B5E3C;
+    --primary-hover: #6F4A2D;
+
+    --text-primary: #2C1810;
+    --text-secondary: #6B4F3A;
+
+   
+    --shadow:
+        0px 8px 24px #695648;
+        
+    --transition: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
