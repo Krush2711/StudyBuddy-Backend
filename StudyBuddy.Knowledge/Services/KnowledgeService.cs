@@ -42,6 +42,22 @@ namespace StudyBuddy.Knowledge.Services
 
             await _repository.CreateAsync(knowledge);
         }
+
+        public async Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId)
+        {
+            return await _repository.GetByUserAsync(userId);
+        }
+
+        public async Task<KnowledgeDocument?> GetByIdAsync(Guid id)
+        {
+            return await _repository.GetByIdAsync(id);
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            await _repository.DeleteAsync(id);
+        }
     }
+
 
 }
