@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using MongoDB.Driver;
 using StudyBuddy.API.Middleware;
 using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.BLL.Interfaces.Auth;
@@ -14,6 +16,10 @@ using StudyBuddy.DAL.Interfaces;
 using StudyBuddy.DAL.Interfaces.Auth;
 using StudyBuddy.DAL.Repositories;
 using StudyBuddy.DAL.Repositories.Interfaces;
+using StudyBuddy.Knowledge.Configuration;
+using StudyBuddy.Knowledge.Interfaces;
+using StudyBuddy.Knowledge.Repositories;
+using StudyBuddy.Knowledge.Services;
 using StudyBuddy.Models.Confugrations;
 using StudyBuddy.Processor.Factory;
 using StudyBuddy.Processor.Interfaces;
@@ -54,6 +60,9 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IDocumentProcessingService, DocumentProcessingService>();
             builder.Services.AddScoped<IImageOcrService, TesseractOcrService>();
             builder.Services.AddScoped<IProcesser, ImageProcessor>();
+            builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+            builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
+            builder.Services.AddScoped<IKnowledgeService, KnowledgeService>();
 
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -77,6 +86,15 @@ namespace StudyBuddy.API
             });
             builder.Services.Configure<JwtSettings>(
             builder.Configuration.GetSection("Jwt"));
+
+            builder.Services.AddSingleton<IMongoClient>(sp =>
+            {
+                var settings = sp
+                    .GetRequiredService<IOptions<MongoDbSettings>>()
+                    .Value;
+
+                return new MongoClient(settings.ConnectionString);
+            });
 
             // Register of authentication 
             builder.Services.AddAuthentication(options =>

@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using StudyBuddy.BLL.Interfaces;
+﻿using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.DAL.Interfaces;
+using StudyBuddy.Knowledge.Interfaces;
+using StudyBuddy.Knowledge.Services;
 using StudyBuddy.Processor.Interfaces;
 using StudyBuddy.Processor.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace StudyBuddy.BLL.Services
 {
@@ -13,12 +15,15 @@ namespace StudyBuddy.BLL.Services
         private readonly IRawDocumentRepository _rawDocumentRepository;
         private readonly IStoredFileRepository _storedFileRepository;
         private readonly IProcessingPipeline _processingPipeline;
+        private readonly IKnowledgeService _knowledgeService;
 
-        public DocumentProcessingService(IRawDocumentRepository rawDocumentRepository, IStoredFileRepository storedFileRepository, IProcessingPipeline processingPipeline)
+        public DocumentProcessingService(IRawDocumentRepository rawDocumentRepository, IStoredFileRepository storedFileRepository, IProcessingPipeline processingPipeline, IKnowledgeService knowledgeService)
         {
             _rawDocumentRepository = rawDocumentRepository;
             _storedFileRepository = storedFileRepository;
             _processingPipeline = processingPipeline;
+            _knowledgeService = knowledgeService;
+
         }
 
         public async Task<ProcessingResult> ProcessAsync(Guid rawDocumentId)
@@ -47,6 +52,12 @@ namespace StudyBuddy.BLL.Services
                 };
 
                 var result = await _processingPipeline.ProcessAsync(context);
+                if (result.Success)
+                {
+                    rawDocument.StoredFile = storedFile; // Since you loaded the file separately, you're simply assigning it to the navigation property before passing the document to the service.
+
+                    await _knowledgeService.StoreAsync(rawDocument, result);
+                }
                 Console.WriteLine("========== Extracted Text ==========");
                 Console.WriteLine(result.ExtractedText);
                 Console.WriteLine("====================================");

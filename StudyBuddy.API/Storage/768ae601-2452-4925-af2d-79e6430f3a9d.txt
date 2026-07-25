@@ -1,0 +1,210 @@
+﻿Controllers → Receives API requests.
+Models → Classes like Payment.
+Services → Business logic.
+Interfaces → Contracts (important for OOP and DI).
+Data → Database-related classes (later DbContext).
+DTOs → Objects sent to and from the API (we'll learn these later).
+
+
+PaymentManagementAPI
+│
+├── Controllers
+│      └── PaymentController.cs
+│
+├── Models
+│      ├── Payment.cs
+│      ├── UPIPayment.cs
+│      ├── CreditCardPayment.cs
+│      └── NetBankingPayment.cs
+│
+├── Interfaces
+│      ├── IPaymentService.cs
+│      └── IPaymentRepository.cs
+│
+├── Services
+│      └── PaymentService.cs
+│
+├── Data
+│      └── AppDbContext.cs
+│
+├── DTOs
+│      ├── CreatePaymentDto.cs
+│      └── PaymentResponseDto.cs
+│
+├── Program.cs
+└── appsettings.json
+
+Program.cs 
+
+1->
+var builder = WebApplication.CreateBuilder(args); -> builder is that preparation stagem Microsoft creates an object called builder. Inside it are things needed to build the application.
+builder
+│
+├── Services
+├── Configuration
+├── Logging
+├── Environment
+└── Many More
+args -> These are command-line arguments.
+
+2-> 
+builder.Services.AddControllers(); -> first Service Registration. ASP.NET must know which services exist. {"Hey ASP.NET...My application uses Controllers."} [ApiController] -> won't work. 
+# builder.Services ->  Think of it as a big container (box). Everything that ASP.NET needs gets registered here.	
+
+3-> 
+builder.Services.AddEndpointsApiExplorer(); -> This is mainly for Swagger/OpenAPI. Scan and finds -> [HttpGet], [HttpPost], [HttpPut], [HttpDelete]. and collects information about them. Without it, Swagger doesn't know which APIs exist.
+
+4-> 
+builder.Services.AddSwaggerGen(); Generate Swagger documentation. This is Dependency Injection beginning to make sense.
+
+5-> var app = builder.Build();
+we actually build the application.  After this, you no longer register services. Because the application has already been built.
+
+6-> 
+if(app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+Am I running in Development? if yes then use the swagger -> Companies don't expose Swagger publicly in Production.
+
+
+7-> app.UseSwagger(); Creates the API documentation.
+
+8-> app.UseSwaggerUI(); -> Creates the beautiful web page. Without this Swagger exists, but no UI.
+
+9-> app.UseHttpsRedirection();  Suppose someone opens http://localhost ASP.NET automatically redirects
+
+10-> app.UseAuthorization(); -> This is one Middleware. Every request passes through here. Later, JWT Roles Admin User All happen here.
+
+11-> app.MapControllers(); -> Most imp line How does ASP.NET know PaymentController exists? -> It scans every Controller. and finds Every controler -> map them without every api Because ASP.NET doesn't know controllers exist.
+
+12-> app.Run(); final line that starts kestrel 
+
+13 ->  builder.Services.AddScoped<IPaymentService, PaymentService>(); //Whenever someone asks for an IPaymentService, give them a PaymentService.
+
+Press F5
+      │
+      ▼
+Main()
+      │
+      ▼
+Create Builder
+      │
+      ▼
+Register Services
+      │
+      ├── Controllers
+      ├── Swagger
+      └── Other Services
+      │
+      ▼
+Build Application
+      │
+      ▼
+Configure Middleware
+      │
+      ├── Swagger
+      ├── HTTPS
+      ├── Authorization
+      │
+      ▼
+Map Controllers
+      │
+      ▼
+Run Kestrel Server
+      │
+      ▼
+Waiting for HTTP Requests
+
+
+
+# Controllers -> Industry Rule -> A Controller should do only 3 things. {Controller is the waiter -> just serve the order }
+Receive Request
+       │
+Call Service
+       │
+Return Response
+///////////////
+Controllers should be thin. it cant have 500 lines of code -> now Where logic goes ? Services is the answer 
+      │
+      ▼
+PaymentService
+      │
+      ▼
+Database
+
+# Services -> it hold he logic and data that conroler uses {It the chef }
+Reuslt -> Controller no longer knows how payments are created. It simply asks the service.
+
+# builder.Services.AddScoped<IPaymentService, PaymentService>(); this line create sthe dependncy ijection -> it says that when ever the IPaymentServices called / used create the object of PaymnetServices (it is simplar to PaymentService s1 = new PaymnetService)
+Dependency Injection is a design pattern where an object receives its dependencies from an external source instead of creating them itself.
+
+
+
+Swagger
+
+      │
+
+HTTP Request
+
+      │
+
+PaymentController
+(Receives Request)
+
+      │
+
+IPaymentService
+
+      │
+
+PaymentService
+(Business Logic)
+
+      │
+
+IPaymentRepository
+
+      │
+
+PaymentRepository
+(Database Logic)
+
+      │
+
+AppDbContext
+
+      │
+
+MySQL
+
+
+Database Transactions :
+
+K -> Balance = 1000
+Rahul -> Balance = 500
+Transfer -> 100
+
+PC crashes
+
+
+Krushna = 900
+Rahul = 500
+
+All Success Or  Nothing Happens -> atomic transaction
+
+---------------------------------------------------------------------------------------------
+Claims
+Think of a JWT as a digital ID card. Your token contains,
+
+UserId
+
+UserName
+
+Email
+
+Role
+
+These are called Claims.
+----------------------------------------------x-----------------------------------------------
