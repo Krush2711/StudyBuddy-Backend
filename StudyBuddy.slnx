@@ -1,8 +1,9 @@
 <Solution>
-  <Project Path="StudyBuddy.API/StudyBuddy.API.csproj" />
-  <Project Path="StudyBuddy.BLL/StudyBuddy.BLL.csproj" />
-  <Project Path="StudyBuddy.DAL/StudyBuddy.DAL.csproj" />
-  <Project Path="StudyBuddy.Knowledge/StudyBuddy.Knowledge.csproj" Id="a9f7374a-2787-45a7-8412-e762e72577f1" />
-  <Project Path="StudyBuddy.Models/StudyBuddy.Models.csproj" />
-  <Project Path="StudyBuddy.Processor/StudyBuddy.Processor.csproj" Id="81b92916-32b9-4951-8fcf-869ce7f80479" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Ai/StudyBuddy.Ai.csproj" Id="2fdec15b-e00c-474d-b6c3-4e9a2d276146" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.API/StudyBuddy.API.csproj" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.BLL/StudyBuddy.BLL.csproj" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.DAL/StudyBuddy.DAL.csproj" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Knowledge/StudyBuddy.Knowledge.csproj" Id="a9f7374a-2787-45a7-8412-e762e72577f1" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Models/StudyBuddy.Models.csproj" />
+  <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Processor/StudyBuddy.Processor.csproj" Id="81b92916-32b9-4951-8fcf-869ce7f80479" />
 </Solution>

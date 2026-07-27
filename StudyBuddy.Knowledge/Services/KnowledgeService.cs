@@ -1,20 +1,24 @@
-﻿using StudyBuddy.Knowledge.Interfaces;
+﻿using StudyBuddy.Ai.DTOs;
+using StudyBuddy.Ai.Interfaces;
+using StudyBuddy.Knowledge.Interfaces;
 using StudyBuddy.Knowledge.Models;
+using StudyBuddy.Models.Entities;
+using StudyBuddy.Processor.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using StudyBuddy.Models.Entities;
-using StudyBuddy.Processor.Models;
 
 namespace StudyBuddy.Knowledge.Services
 {
     public class KnowledgeService : IKnowledgeService
     {
         private readonly IKnowledgeRepository _repository;
+        private readonly IAiService _aiService;
 
-        public KnowledgeService(IKnowledgeRepository repository)
+        public KnowledgeService(IKnowledgeRepository repository, IAiService aiService)
         {
             _repository = repository;
+            _aiService = aiService; 
         }
 
         public async Task StoreAsync(
@@ -39,8 +43,19 @@ namespace StudyBuddy.Knowledge.Services
 
                 CreatedAt = DateTime.UtcNow
             };
+            var createdDocument = await _repository.CreateAsync(knowledge);
+            var summary = await _aiService.GenerateSummaryAsync(
+            new SummaryRequestDto
+            {
+                Id = createdDocument.Id,
+                UserId = createdDocument.UserId,
+                RawDocumentId = createdDocument.RawDocumentId,
+                FileName = createdDocument.FileName,
+                FileType = createdDocument.FileType,
+                ExtractedText = createdDocument.ExtractedText
+             });
 
-            await _repository.CreateAsync(knowledge);
+            await _repository.UpdateSummaryAsync(summary.RawDocumentId,summary.Summary);
         }
 
         public async Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId)

@@ -22,9 +22,11 @@ namespace StudyBuddy.Knowledge.Repositories
             _collection = database.GetCollection<KnowledgeDocument>(settings.Value.KnowledgeCollectionName);
         }
 
-        public async Task CreateAsync(KnowledgeDocument document)
+        public async Task<KnowledgeDocument> CreateAsync(KnowledgeDocument document)
         {
             await _collection.InsertOneAsync(document);
+
+            return document;
         }
 
         public async Task<KnowledgeDocument?> GetByIdAsync(Guid id)
@@ -45,7 +47,17 @@ namespace StudyBuddy.Knowledge.Repositories
         {
             await _collection.DeleteOneAsync(x => x.Id == id);
         }
+
+        public async Task UpdateSummaryAsync(Guid rawDocumentId,string summary)
+        {
+            var update = Builders<KnowledgeDocument>.Update.Set(x => x.Summary, summary);
+
+            await _collection.UpdateOneAsync(
+                x => x.RawDocumentId == rawDocumentId,
+                update);
+        }
     }
+
 }
 
     //Things You'll Learn Here

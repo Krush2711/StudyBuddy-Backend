@@ -16,6 +16,7 @@ namespace StudyBuddy.Knowledge.Models
         public Guid UserId { get; set; }
 
         //[BsonRepresentation(BsonType.String)]
+        public string? Summary { get; set; }
 
         public Guid RawDocumentId { get; set; }
 

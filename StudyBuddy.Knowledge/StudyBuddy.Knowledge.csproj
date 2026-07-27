@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StudyBuddy.Ai\StudyBuddy.Ai.csproj" />
     <ProjectReference Include="..\StudyBuddy.DAL\StudyBuddy.DAL.csproj" />
   </ItemGroup>
 

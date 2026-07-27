@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StudyBuddy.Ai\StudyBuddy.Ai.csproj" />
     <ProjectReference Include="..\StudyBuddy.BLL\StudyBuddy.BLL.csproj" />
     <ProjectReference Include="..\StudyBuddy.DAL\StudyBuddy.DAL.csproj" />
     <ProjectReference Include="..\StudyBuddy.Knowledge\StudyBuddy.Knowledge.csproj" />

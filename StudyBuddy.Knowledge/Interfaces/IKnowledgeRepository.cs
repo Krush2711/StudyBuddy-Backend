@@ -7,9 +7,10 @@ namespace StudyBuddy.Knowledge.Interfaces
 {
     public interface IKnowledgeRepository
     {
-        Task CreateAsync(KnowledgeDocument document);
+        Task<KnowledgeDocument> CreateAsync(KnowledgeDocument document);
 
         Task<KnowledgeDocument?> GetByIdAsync(Guid id);
+        Task UpdateSummaryAsync(Guid rawDocumentId, string summary);
 
         Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId);
 

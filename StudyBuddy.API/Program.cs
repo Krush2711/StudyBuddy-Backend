@@ -25,6 +25,8 @@ using StudyBuddy.Processor.Factory;
 using StudyBuddy.Processor.Interfaces;
 using StudyBuddy.Processor.Processors;
 using StudyBuddy.Processor.Services;
+using StudyBuddy.Ai.Services;
+using StudyBuddy.Ai.Interfaces;
 using System.Text;
 
 namespace StudyBuddy.API
@@ -63,7 +65,7 @@ namespace StudyBuddy.API
             builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
             builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             builder.Services.AddScoped<IKnowledgeService, KnowledgeService>();
-
+            builder.Services.AddHttpClient<IAiService, AiService>();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
@@ -83,6 +85,12 @@ namespace StudyBuddy.API
                 {
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
                 });
+            });
+
+            builder.Services.AddHttpClient<IAiService, AiService>(client =>
+            {
+                client.BaseAddress = new Uri(
+                    builder.Configuration["AIService:BaseUrl"]!);
             });
             builder.Services.Configure<JwtSettings>(
             builder.Configuration.GetSection("Jwt"));
