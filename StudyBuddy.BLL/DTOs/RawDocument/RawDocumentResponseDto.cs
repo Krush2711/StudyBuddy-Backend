@@ -8,6 +8,7 @@ namespace StudyBuddy.BLL.DTOs.RawDocument
     {
         public Guid Id { get; set; }
 
+
         public string Title { get; set; } = string.Empty;
 
         public string SourceType { get; set; } = string.Empty;
