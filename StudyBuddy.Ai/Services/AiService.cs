@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Json;
-
-using StudyBuddy.Ai.DTOs;
+﻿using StudyBuddy.Ai.DTOs;
+using StudyBuddy.Ai.DTOs.Responce;
 using StudyBuddy.Ai.Interfaces;
+using System.Net.Http.Json;
 
 namespace StudyBuddy.Ai.Services;
 
@@ -15,7 +15,7 @@ public class AiService : IAiService
         _httpClient = httpClient;
     }
 
-    public async Task<SummaryResponseDto> GenerateSummaryAsync(SummaryRequestDto request)
+    public async Task<DocumentAnalysisResponseDto> AnalyzeDocumentAsync(DocumentAnalysisRequestDto request)
     {
 
         {
@@ -31,7 +31,7 @@ public class AiService : IAiService
                     $"AI Summary Generation Failed. Status: {(int)response.StatusCode}, Response: {error}");
             }
 
-            var summary = await response.Content.ReadFromJsonAsync<SummaryResponseDto>();
+            var summary = await response.Content.ReadFromJsonAsync<DocumentAnalysisResponseDto>();
 
             if (summary is null)
             {

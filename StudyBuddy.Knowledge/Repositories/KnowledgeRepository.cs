@@ -1,6 +1,8 @@
-﻿using Microsoft.VisualBasic;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
 using MongoDB.Driver;
+using StudyBuddy.Ai.DTOs.Responce;
 using StudyBuddy.Knowledge.Configuration;
 using StudyBuddy.Knowledge.Interfaces;
 using StudyBuddy.Knowledge.Models;
@@ -8,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Text;
-using Microsoft.Extensions.Options;
 
 namespace StudyBuddy.Knowledge.Repositories
 {
@@ -48,9 +49,53 @@ namespace StudyBuddy.Knowledge.Repositories
             await _collection.DeleteOneAsync(x => x.Id == id);
         }
 
-        public async Task UpdateSummaryAsync(Guid rawDocumentId,string summary)
+        public async Task UpdateAnalysisAsync(
+            Guid rawDocumentId,
+            DocumentAnalysisResponseDto analysis)
         {
-            var update = Builders<KnowledgeDocument>.Update.Set(x => x.Summary, summary);
+            var update = Builders<KnowledgeDocument>.Update
+
+                .Set(x => x.Summary, analysis.Summary)
+
+                .Set(x => x.Subject, analysis.Subject)
+
+                .Set(x => x.Category, analysis.Category)
+
+                .Set(x => x.SubCategory, analysis.SubCategory)
+
+                .Set(x => x.DocumentType, analysis.DocumentType)
+
+                .Set(x => x.Language, analysis.Language)
+
+                .Set(x => x.Difficulty, analysis.Difficulty)
+
+                .Set(x => x.EstimatedReadingTime, analysis.EstimatedReadingTime)
+
+                .Set(x => x.Topics, analysis.Topics)
+
+                .Set(x => x.Keywords, analysis.Keywords)
+
+                .Set(x => x.Concepts, analysis.Concepts)
+
+                .Set(x => x.Technologies, analysis.Technologies)
+
+                .Set(x => x.LearningObjectives, analysis.LearningObjectives)
+
+                .Set(x => x.Prerequisites, analysis.Prerequisites)
+
+                .Set(x => x.RevisionPriority, analysis.RevisionPriority)
+
+                .Set(x => x.ComplexityScore, analysis.ComplexityScore)
+
+                .Set(x => x.Confidence, analysis.Confidence)
+
+                .Set(x => x.HasCodeExamples, analysis.HasCodeExamples)
+
+                .Set(x => x.ContainsAlgorithm, analysis.ContainsAlgorithm)
+
+                .Set(x => x.ContainsFormula, analysis.ContainsFormula)
+
+                .Set(x => x.ContainsDiagram, analysis.ContainsDiagram);
 
             await _collection.UpdateOneAsync(
                 x => x.RawDocumentId == rawDocumentId,

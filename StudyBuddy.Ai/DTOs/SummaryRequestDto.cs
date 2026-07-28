@@ -1,6 +1,6 @@
 ﻿namespace StudyBuddy.Ai.DTOs;
 
-public class SummaryRequestDto
+public class DocumentAnalysisRequestDto
 {
     public Guid Id { get; set; }
 
