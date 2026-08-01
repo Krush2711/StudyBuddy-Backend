@@ -42,4 +42,50 @@ public class AiService : IAiService
         }
 
     }
+
+        public async Task<DetailedNotesResponseDto> GenerateDetailedNotesAsync(DocumentAnalysisRequestDto request)
+        {
+            var response = await _httpClient.PostAsJsonAsync(
+                "/notes",
+                request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                throw new Exception(
+                    $"Detailed Notes generation failed.\n{error}");
+            }
+
+            var result =
+                await response.Content.ReadFromJsonAsync<DetailedNotesResponseDto>();
+
+            if (result == null)
+                throw new Exception("Failed to deserialize Detailed Notes.");
+
+            return result;
+        }
+
+    public async Task<ShortNotesResponseDto> GenerateShortNotesAsync(DocumentAnalysisRequestDto request)
+         {
+                var response = await _httpClient.PostAsJsonAsync(
+                    "/shortnotes",
+                    request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+
+                    throw new Exception(
+                        $"Short Notes generation failed. Status {(int)response.StatusCode}. {error}");
+        }
+
+        var result =
+            await response.Content.ReadFromJsonAsync<ShortNotesResponseDto>();
+
+        if (result == null)
+            throw new Exception("Unable to deserialize Short Notes response.");
+
+        return result;
+    }
 }

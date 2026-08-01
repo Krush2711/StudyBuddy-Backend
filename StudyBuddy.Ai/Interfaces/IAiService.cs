@@ -7,4 +7,10 @@ public interface IAiService
 {
     Task<DocumentAnalysisResponseDto> AnalyzeDocumentAsync(
     DocumentAnalysisRequestDto request);
+
+    Task<DetailedNotesResponseDto> GenerateDetailedNotesAsync(
+    DocumentAnalysisRequestDto request);
+
+    Task<ShortNotesResponseDto> GenerateShortNotesAsync(
+    DocumentAnalysisRequestDto request);
 }

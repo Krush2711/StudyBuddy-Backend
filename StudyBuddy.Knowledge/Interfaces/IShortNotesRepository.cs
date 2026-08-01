@@ -1,0 +1,14 @@
+﻿using StudyBuddy.Knowledge.Models;
+
+namespace StudyBuddy.Knowledge.Interfaces;
+
+public interface IShortNotesRepository
+{
+    Task CreateAsync(ShortNotesDocument document);
+
+    Task<ShortNotesDocument?> GetByIdAsync(Guid id);
+
+    Task<List<ShortNotesDocument>> GetByUserAsync(Guid userId);
+
+    Task DeleteAsync(Guid id);
+}

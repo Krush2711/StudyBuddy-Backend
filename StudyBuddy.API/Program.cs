@@ -65,7 +65,16 @@ namespace StudyBuddy.API
             builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
             builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepository>();
             builder.Services.AddScoped<IKnowledgeService, KnowledgeService>();
-            builder.Services.AddHttpClient<IAiService, AiService>();
+            builder.Services.AddScoped<IDetailedNotesRepository, DetailedNotesRepository>();
+            builder.Services.AddScoped<IDetailedNotesService, DetailedNotesService>();
+            builder.Services.AddScoped<IShortNotesRepository, ShortNotesRepository>();
+            builder.Services.AddScoped<IShortNotesService, ShortNotesService>();
+
+            builder.Services.AddHttpClient<IAiService, AiService>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:8000");
+                client.Timeout = TimeSpan.FromMinutes(10);   // 10 minutes
+            });
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
