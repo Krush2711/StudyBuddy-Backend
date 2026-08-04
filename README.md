@@ -468,3 +468,4 @@ Backend Developer | ASP.NET Core | C# | SQL Server | MongoDB | FastAPI | AI Inte
 ---
 
 I think this README reflects the current state of your project very well. It documents the **backend architecture you've actually built**, while leaving the upcoming AI capabilities clearly separated as future enhancements. When you're ready, we can create a second README focused entirely on the **AI pipeline (FastAPI, Gemini, NLP, OCR, RAG, revision engine, and knowledge generation)**.
+<img width="1408" height="768" alt="image" src="https://github.com/user-attachments/assets/8e9d92f6-5e25-4286-b5d3-b993f74ae0d9" />
