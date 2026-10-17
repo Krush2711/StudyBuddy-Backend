@@ -58,4 +58,15 @@ public class ShortNotesService : IShortNotesService
 
         await _repository.CreateAsync(document);
     }
+
+    public async Task<List<ShortNotesDocument>> GetByUserAsync(Guid userId)
+    {
+        return await _repository.GetByUserAsync(userId);
+    }
+
+    public async Task DeleteByUserAsync(Guid userId)
+    {
+        await _repository.DeleteByUserAsync(userId);
+    }
+
 }

@@ -85,5 +85,11 @@ namespace StudyBuddy.Knowledge.Services
         {
             await _repository.DeleteAsync(id);
         }
+
+        public async Task DeleteByUserAsync(Guid userId)
+        {
+            await _repository.DeleteByUserAsync(userId);
+        }
+
     }
 }

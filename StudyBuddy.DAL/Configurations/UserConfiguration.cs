@@ -21,6 +21,10 @@ namespace StudyBuddy.DAL.Configurations
             builder.Property(x => x.profileImageUrl).HasMaxLength(500);
             builder.Property(x => x.Isactive).HasDefaultValue(false);
             builder.Property(x => x.IsEmailVerified).HasDefaultValue(false);
+            builder.Property(x => x.Role)
+                .IsRequired()
+                .HasMaxLength(32)
+                .HasDefaultValue("User");
 
             
 

@@ -49,6 +49,12 @@ namespace StudyBuddy.Knowledge.Repositories
             await _collection.DeleteOneAsync(x => x.Id == id);
         }
 
+
+        public async Task DeleteByUserAsync(Guid userId)
+        {
+            await _collection.DeleteManyAsync(x => x.UserId == userId);
+        }
+
         public async Task UpdateAnalysisAsync(
             Guid rawDocumentId,
             DocumentAnalysisResponseDto analysis)

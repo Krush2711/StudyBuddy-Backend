@@ -43,4 +43,10 @@ public class ShortNotesRepository : IShortNotesRepository
     {
         await _collection.DeleteOneAsync(x => x.Id == id);
     }
+
+        public async Task DeleteByUserAsync(Guid userId)
+        {
+            await _collection.DeleteManyAsync(x => x.UserId == userId);
+        }
+
 }

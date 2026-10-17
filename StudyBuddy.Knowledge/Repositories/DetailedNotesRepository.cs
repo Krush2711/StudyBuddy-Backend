@@ -39,5 +39,18 @@ namespace StudyBuddy.Knowledge.Repositories
         {
             await _collection.DeleteOneAsync(x => x.Id == id);
         }
+
+        public async Task<List<DetailedNotesDocument>> GetByUserAsync(Guid userId)
+        {
+            return await _collection
+                .Find(x => x.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task DeleteByUserAsync(Guid userId)
+        {
+            await _collection.DeleteManyAsync(x => x.UserId == userId);
+        }
+
     }
 }

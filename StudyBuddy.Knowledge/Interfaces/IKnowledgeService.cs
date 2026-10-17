@@ -1,10 +1,6 @@
-﻿using StudyBuddy.Knowledge.Models;
+using StudyBuddy.Knowledge.Models;
 using StudyBuddy.Models.Entities;
 using StudyBuddy.Processor.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace StudyBuddy.Knowledge.Interfaces
 {
@@ -14,5 +10,6 @@ namespace StudyBuddy.Knowledge.Interfaces
         Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId);
         Task<KnowledgeDocument?> GetByIdAsync(Guid id);
         Task DeleteAsync(Guid id);
+        Task DeleteByUserAsync(Guid userId);
     }
 }

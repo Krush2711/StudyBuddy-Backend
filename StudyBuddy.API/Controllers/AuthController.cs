@@ -25,7 +25,7 @@ namespace StudyBuddy.API.Controllers
         }
 
         
-        [HttpPost("api/auth")]
+        [HttpPost("/api/auth")]
         public async Task<IActionResult> Register(RegisterRequestDto request)
         {
             var responce = await _authService.RegisterAsync(request);
@@ -33,13 +33,13 @@ namespace StudyBuddy.API.Controllers
             return Ok(responce);
         }
 
-        [HttpPost("api/login")]  
+        [HttpPost("/api/login")]
         public async Task<IActionResult> Login(LoginRequestDto request)
         {
             var responce = await _authService.LoginAsync(request);
             return Ok(responce);
         }
-        [HttpGet("api/login-google")]
+        [HttpGet("/api/login-google")]
         public IActionResult GoogleLogin()
         {
             var properties = new AuthenticationProperties
@@ -79,7 +79,7 @@ namespace StudyBuddy.API.Controllers
         }
 
         [Authorize]
-        [HttpGet("api/profile")]
+        [HttpGet("/api/profile")]
         public IActionResult GetProfile()
         {
             return Ok("Authenticated");

@@ -55,4 +55,15 @@ public class DetailedNotesService : IDetailedNotesService
         // Save into MongoDB
         await _repository.CreateAsync(document);
     }
+
+    public async Task<List<DetailedNotesDocument>> GetByUserAsync(Guid userId)
+    {
+        return await _repository.GetByUserAsync(userId);
+    }
+
+    public async Task DeleteByUserAsync(Guid userId)
+    {
+        await _repository.DeleteByUserAsync(userId);
+    }
+
 }

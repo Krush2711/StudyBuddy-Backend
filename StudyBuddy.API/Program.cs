@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
+using StudyBuddy.API.Authentication;
+using StudyBuddy.API.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using MongoDB.Driver;
 using StudyBuddy.API.Middleware;
+using StudyBuddy.API.Seeding;
 using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.BLL.Services;
@@ -33,7 +37,7 @@ namespace StudyBuddy.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -94,6 +98,16 @@ namespace StudyBuddy.API
                 {
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
                 });
+
+                options.AddSecurityDefinition(AdminApiKeyAuthenticationHandler.SchemeName, new OpenApiSecurityScheme
+                {
+                    Name = AdminApiKeyAuthenticationHandler.HeaderName,
+                    Type = SecuritySchemeType.ApiKey,
+                    In = ParameterLocation.Header,
+                    Description = "Admin API key. Configure Admin:ApiKey (env: Admin__ApiKey)."
+                });
+
+                options.OperationFilter<AdminApiKeyOperationFilter>();
             });
 
             builder.Services.AddHttpClient<IAiService, AiService>(client =>
@@ -147,18 +161,39 @@ namespace StudyBuddy.API
 
                  options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
              });
-            builder.Services.AddAuthorization();
+            builder.Services
+                .AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, AdminApiKeyAuthenticationHandler>(
+                    AdminApiKeyAuthenticationHandler.SchemeName,
+                    _ => { });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy =>
+                    policy.RequireRole(AdminSeeder.AdminRole));
+            });
 
 
             var app = builder.Build();
+
+            await AdminSeeder.SeedAsync(
+                app.Services,
+                app.Configuration,
+                app.Environment);
+
                         app.UseMiddleware<GlobalExceptionMiddleware>();
                         // Configure the HTTP request pipeline.
                       
              app.UseSwagger();
              app.UseSwaggerUI();
-            
 
-            app.UseHttpsRedirection();
+
+            // replace:  app.UseHttpsRedirection();
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
+
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -166,7 +201,7 @@ namespace StudyBuddy.API
 
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

@@ -41,5 +41,20 @@ namespace StudyBuddy.BLL.Services
                 FileSize = stream.Length
             };
         }
+
+        public Task DeleteAsync(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return Task.CompletedTask;
+            }
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }

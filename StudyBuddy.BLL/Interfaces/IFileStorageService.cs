@@ -1,12 +1,14 @@
-﻿using StudyBuddy.BLL.DTOs.Storage;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using StudyBuddy.BLL.DTOs.Storage;
 
 namespace StudyBuddy.BLL.Interfaces
 {
     public interface IFileStorageService
     {
-        Task<StoredFileResultDto> SaveAsync(Stream stream,string fileName,string contentType);
+        Task<StoredFileResultDto> SaveAsync(
+            Stream stream,
+            string fileName,
+            string contentType);
+
+        Task DeleteAsync(string filePath);
     }
 }
