@@ -137,6 +137,10 @@ namespace StudyBuddy.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("GeminiApiKey")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("GoogleId")
                         .HasColumnType("nvarchar(max)");
 

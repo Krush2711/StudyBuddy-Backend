@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using StudyBuddy.Ai.Exceptions;
 using StudyBuddy.BLL.Exceptions;
 
 namespace StudyBuddy.API.Middleware
@@ -38,6 +39,27 @@ namespace StudyBuddy.API.Middleware
                 await HandleExceptionAsync(
                     context,
                     HttpStatusCode.NotFound,
+                    ex.Message);
+            }
+            catch (GeminiApiKeyMissingException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.BadRequest,
+                    ex.Message);
+            }
+            catch (GeminiApiKeyRejectedException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.BadRequest,
+                    ex.Message);
+            }
+            catch (InvalidGeminiApiKeyException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.BadRequest,
                     ex.Message);
             }
             //catch (ExternalAuthenticationException ex)

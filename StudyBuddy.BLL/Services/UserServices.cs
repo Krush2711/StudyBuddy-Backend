@@ -1,3 +1,4 @@
+using StudyBuddy.Ai.Interfaces;
 using StudyBuddy.BLL.DTOs.Admin;
 using StudyBuddy.BLL.DTOs.User;
 using StudyBuddy.BLL.Exceptions;
@@ -6,29 +7,38 @@ using StudyBuddy.DAL.Repositories.Interfaces;
 using StudyBuddy.Knowledge.Interfaces;
 using StudyBuddy.Knowledge.Models;
 using StudyBuddy.Models.Entities;
+using System.Text.RegularExpressions;
 
 namespace StudyBuddy.BLL.Services
 {
     public class UserService : IUserService
     {
+        // Google AI Studio keys start with "AIza" followed by ~35 URL-safe characters.
+        private static readonly Regex GeminiApiKeyPattern = new(
+            @"^AIza[0-9A-Za-z\-_]{30,60}$",
+            RegexOptions.Compiled);
+
         private readonly IUserRepository _userRepository;
         private readonly IKnowledgeService _knowledgeService;
         private readonly IDetailedNotesService _detailedNotesService;
         private readonly IShortNotesService _shortNotesService;
         private readonly IFileStorageService _fileStorageService;
+        private readonly IGeminiApiKeyProtector _geminiApiKeyProtector;
 
         public UserService(
             IUserRepository userRepository,
             IKnowledgeService knowledgeService,
             IDetailedNotesService detailedNotesService,
             IShortNotesService shortNotesService,
-            IFileStorageService fileStorageService)
+            IFileStorageService fileStorageService,
+            IGeminiApiKeyProtector geminiApiKeyProtector)
         {
             _userRepository = userRepository;
             _knowledgeService = knowledgeService;
             _detailedNotesService = detailedNotesService;
             _shortNotesService = shortNotesService;
             _fileStorageService = fileStorageService;
+            _geminiApiKeyProtector = geminiApiKeyProtector;
         }
 
         public async Task<UserProfileDto> GetProfileAsync(Guid userId)
@@ -77,8 +87,41 @@ namespace StudyBuddy.BLL.Services
 
         }
 
-        public async Task<List<AdminUserDto>> GetAllUsersAsync()
+        public async Task SaveGeminiApiKeyAsync(
+            Guid userId,
+            SetGeminiApiKeyRequestDto request)
         {
+            var apiKey = request.ApiKey?.Trim();
+
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidGeminiApiKeyException(
+                    "Gemini API key is required.");
+            }
+
+            // Basic format validation before calling Google. The key is verified
+            //// for real on the next AI request; rejected keys return a clear 400.
+            //if (!GeminiApiKeyPattern.IsMatch(apiKey))
+            //{
+            //    throw new InvalidGeminiApiKeyException(
+            //        "Invalid Gemini API key format. Expected a key beginning with \"AIza\".");
+            //}
+
+            var user = await _userRepository.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException(userId);
+            }
+
+            // Encrypted at rest; the plaintext key is never persisted or returned.
+            user.GeminiApiKey = _geminiApiKeyProtector.Protect(apiKey);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepository.UpdateUserAsync(user);
+        }
+
+        public async Task<List<AdminUserDto>> GetAllUsersAsync()        {
             var users = await _userRepository.GetAllAsync();
 
             return users.Select(MapToAdminDto).ToList();

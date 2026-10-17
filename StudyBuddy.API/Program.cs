@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using StudyBuddy.API.Authentication;
+using StudyBuddy.API.Security;
 using StudyBuddy.API.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -56,6 +58,13 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IFileStorageService, FileStorageService>();
             builder.Services.AddScoped<IRawDocumentService, RawDocumentService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+
+            // Gemini keys are encrypted at rest with Data Protection.
+            builder.Services.AddDataProtection()
+                .SetApplicationName("StudyBuddy");
+            builder.Services.AddSingleton<IGeminiApiKeyProtector, DataProtectionGeminiApiKeyProtector>();
+            builder.Services.AddScoped<IGeminiApiKeyProvider, GeminiApiKeyProvider>();
+
             builder.Services.AddControllers();
             builder.Services.AddScoped<IProcesser, TextProcessor>();
             builder.Services.AddScoped<IProcessorFactory, ProcessorFactory>();
@@ -73,12 +82,6 @@ namespace StudyBuddy.API
             builder.Services.AddScoped<IDetailedNotesService, DetailedNotesService>();
             builder.Services.AddScoped<IShortNotesRepository, ShortNotesRepository>();
             builder.Services.AddScoped<IShortNotesService, ShortNotesService>();
-
-            builder.Services.AddHttpClient<IAiService, AiService>(client =>
-            {
-                client.BaseAddress = new Uri("http://localhost:8000");
-                client.Timeout = TimeSpan.FromMinutes(10);   // 10 minutes
-            });
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddEndpointsApiExplorer();
@@ -114,6 +117,7 @@ namespace StudyBuddy.API
             {
                 client.BaseAddress = new Uri(
                     builder.Configuration["AIService:BaseUrl"]!);
+                client.Timeout = TimeSpan.FromMinutes(10);
             });
             builder.Services.Configure<JwtSettings>(
             builder.Configuration.GetSection("Jwt"));

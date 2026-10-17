@@ -1,4 +1,6 @@
-﻿using StudyBuddy.BLL.DTOs.RawDocument;
+﻿using StudyBuddy.Ai.Exceptions;
+using StudyBuddy.Ai.Interfaces;
+using StudyBuddy.BLL.DTOs.RawDocument;
 using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.DAL.Interfaces;
 using StudyBuddy.Models.Entities;
@@ -11,16 +13,20 @@ namespace StudyBuddy.BLL.Services
         private readonly IStoredFileRepository _storedFileRepository;
         private readonly IFileStorageService _fileStorageService;
         private readonly IDocumentProcessingService _documentProcessingService;
+        private readonly IGeminiApiKeyProvider _geminiApiKeyProvider;
+
         public RawDocumentService(
             IRawDocumentRepository rawRepository,
             IStoredFileRepository storedFileRepository,
             IFileStorageService fileStorageService,
-            IDocumentProcessingService documentProcessingService)
+            IDocumentProcessingService documentProcessingService,
+            IGeminiApiKeyProvider geminiApiKeyProvider)
         {
             _rawRepository = rawRepository;
             _storedFileRepository = storedFileRepository;
             _fileStorageService = fileStorageService;
             _documentProcessingService = documentProcessingService;
+            _geminiApiKeyProvider = geminiApiKeyProvider;
         }
 
         public async Task<RawDocumentResponseDto> UploadAsync(
@@ -29,6 +35,14 @@ namespace StudyBuddy.BLL.Services
         {
             if (request.FileStream == null)
                 throw new Exception("File stream is empty.");
+
+            // Fail before saving anything if the user has no Gemini key: the
+            // ingestion pipeline needs it for summarization and notes.
+            var geminiApiKey =
+                await _geminiApiKeyProvider.GetApiKeyAsync(userId);
+
+            if (string.IsNullOrWhiteSpace(geminiApiKey))
+                throw new GeminiApiKeyMissingException();
 
             // Save physical file
             var fileResult = await _fileStorageService.SaveAsync(

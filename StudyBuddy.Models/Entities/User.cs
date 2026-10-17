@@ -22,6 +22,9 @@ namespace StudyBuddy.Models.Entities
 
         public string Role { get; set; } = "User";
 
+        // Stored encrypted at rest (Data Protection). Never returned by DTOs.
+        public string? GeminiApiKey { get; set; }
+
         public ICollection<RawDocument> RawDocuments { get; set; } = new List<RawDocument>();
 
     }

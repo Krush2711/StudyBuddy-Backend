@@ -8,6 +8,7 @@ namespace StudyBuddy.BLL.Interfaces
     {
         Task<UserProfileDto> GetProfileAsync(Guid userId);
         Task<UserProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileRequestDto request);
+        Task SaveGeminiApiKeyAsync(Guid userId, SetGeminiApiKeyRequestDto request);
         Task<List<AdminUserDto>> GetAllUsersAsync();
         Task DeleteUserAsync(Guid userId);
         Task<List<KnowledgeDocument>> GetUserKnowledgeAsync(Guid userId);

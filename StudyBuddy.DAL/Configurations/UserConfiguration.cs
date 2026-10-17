@@ -26,6 +26,10 @@ namespace StudyBuddy.DAL.Configurations
                 .HasMaxLength(32)
                 .HasDefaultValue("User");
 
+            // Ciphertext produced by ASP.NET Core Data Protection.
+            builder.Property(x => x.GeminiApiKey)
+                .HasMaxLength(2000);
+
             
 
         }
