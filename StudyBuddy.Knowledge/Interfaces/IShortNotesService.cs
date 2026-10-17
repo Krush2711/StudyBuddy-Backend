@@ -5,8 +5,11 @@ namespace StudyBuddy.Knowledge.Interfaces
 {
     public interface IShortNotesService
     {
-        Task GenerateAsync(DocumentAnalysisRequestDto request);
-        Task<List<ShortNotesDocument>> GetByUserAsync(Guid userId);
+        Task GenerateAsync(DocumentAnalysisRequestDto request, string? tag = null);
+        Task<List<ShortNotesDocument>> GetByUserAsync(
+            Guid userId,
+            DateTime? fromUtc = null,
+            string? subjectOrTag = null);
         Task DeleteByUserAsync(Guid userId);
     }
 }

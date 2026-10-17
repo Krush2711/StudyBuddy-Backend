@@ -18,5 +18,8 @@ public class UploadRawDocumentDto
 
     public string? Description { get; set; }
 
+    // Optional subject/tag used to categorize the ingested document and notes.
+    public string? Subject { get; set; }
+
     public DateTime? LearningDate { get; set; }
 }

@@ -18,7 +18,7 @@ public class DetailedNotesService : IDetailedNotesService
         _repository = repository;
     }
 
-    public async Task GenerateAsync(DocumentAnalysisRequestDto request)
+    public async Task GenerateAsync(DocumentAnalysisRequestDto request, string? tag = null)
     {
         // Call FastAPI
         var response = await _aiService.GenerateDetailedNotesAsync(request);
@@ -31,6 +31,8 @@ public class DetailedNotesService : IDetailedNotesService
             UserId = response.UserId,
             RawDocumentId = response.RawDocumentId,
             FileName = response.FileName,
+
+            Tag = tag?.Trim() ?? string.Empty,
 
             Title = response.Title,
             Overview = response.Overview,
@@ -56,9 +58,12 @@ public class DetailedNotesService : IDetailedNotesService
         await _repository.CreateAsync(document);
     }
 
-    public async Task<List<DetailedNotesDocument>> GetByUserAsync(Guid userId)
+    public async Task<List<DetailedNotesDocument>> GetByUserAsync(
+        Guid userId,
+        DateTime? fromUtc = null,
+        string? subjectOrTag = null)
     {
-        return await _repository.GetByUserAsync(userId);
+        return await _repository.GetByUserAsync(userId, fromUtc, subjectOrTag);
     }
 
     public async Task DeleteByUserAsync(Guid userId)

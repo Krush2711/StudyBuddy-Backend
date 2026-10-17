@@ -34,6 +34,9 @@ namespace StudyBuddy.Knowledge.Models
 
         public string Subject { get; set; } = string.Empty;
 
+        // Optional user-supplied subject/tag from ingestion.
+        public string Tag { get; set; } = string.Empty;
+
         public string Category { get; set; } = string.Empty;
 
         public string SubCategory { get; set; } = string.Empty;

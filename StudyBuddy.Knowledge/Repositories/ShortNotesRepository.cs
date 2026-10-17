@@ -32,10 +32,31 @@ public class ShortNotesRepository : IShortNotesRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<ShortNotesDocument>> GetByUserAsync(Guid userId)
+    public async Task<List<ShortNotesDocument>> GetByUserAsync(
+        Guid userId,
+        DateTime? fromUtc = null,
+        string? subjectOrTag = null)
     {
+        var filters = new List<FilterDefinition<ShortNotesDocument>>
+        {
+            Builders<ShortNotesDocument>.Filter.Eq(x => x.UserId, userId)
+        };
+
+        if (fromUtc.HasValue)
+        {
+            filters.Add(Builders<ShortNotesDocument>.Filter
+                .Gte(x => x.CreatedAt, fromUtc.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(subjectOrTag))
+        {
+            filters.Add(Builders<ShortNotesDocument>.Filter
+                .Eq(x => x.Tag, subjectOrTag));
+        }
+
         return await _collection
-            .Find(x => x.UserId == userId)
+            .Find(Builders<ShortNotesDocument>.Filter.And(filters))
+            .SortByDescending(x => x.CreatedAt)
             .ToListAsync();
     }
 

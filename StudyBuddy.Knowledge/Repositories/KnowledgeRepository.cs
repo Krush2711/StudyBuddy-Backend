@@ -37,10 +37,33 @@ namespace StudyBuddy.Knowledge.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId)
+        public async Task<List<KnowledgeDocument>> GetByUserAsync(
+            Guid userId,
+            DateTime? fromUtc = null,
+            string? subjectOrTag = null)
         {
+            var filters = new List<FilterDefinition<KnowledgeDocument>>
+            {
+                Builders<KnowledgeDocument>.Filter.Eq(x => x.UserId, userId)
+            };
+
+            if (fromUtc.HasValue)
+            {
+                filters.Add(Builders<KnowledgeDocument>.Filter
+                    .Gte(x => x.CreatedAt, fromUtc.Value));
+            }
+
+            if (!string.IsNullOrWhiteSpace(subjectOrTag))
+            {
+                // Match either the user-supplied tag or the AI-detected subject.
+                filters.Add(Builders<KnowledgeDocument>.Filter.Or(
+                    Builders<KnowledgeDocument>.Filter.Eq(x => x.Tag, subjectOrTag),
+                    Builders<KnowledgeDocument>.Filter.Eq(x => x.Subject, subjectOrTag)));
+            }
+
             return await _collection
-                .Find(x => x.UserId == userId)
+                .Find(Builders<KnowledgeDocument>.Filter.And(filters))
+                .SortByDescending(x => x.CreatedAt)
                 .ToListAsync();
         }
 

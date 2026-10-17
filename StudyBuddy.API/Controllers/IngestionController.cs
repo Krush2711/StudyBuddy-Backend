@@ -27,7 +27,8 @@ namespace StudyBuddy.API.Controllers
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(userId) ||
+                !Guid.TryParse(userId, out var parsedUserId))
             {
                 return Unauthorized();
             }
@@ -43,11 +44,14 @@ namespace StudyBuddy.API.Controllers
                 SourceType = request.SourceType,
                 Title = request.Title,
                 Description = request.Description,
+                Subject = string.IsNullOrWhiteSpace(request.Subject)
+                    ? request.Tag
+                    : request.Subject,
                 LearningDate = request.LearningDate
             };
 
             var response = await _rawDocumentService.UploadAsync(
-                Guid.Parse(userId),
+                parsedUserId,
                 dto);
 
             return Ok(response);

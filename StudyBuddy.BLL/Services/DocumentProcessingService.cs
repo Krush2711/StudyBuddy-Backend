@@ -26,7 +26,7 @@ namespace StudyBuddy.BLL.Services
 
         }
 
-        public async Task<ProcessingResult> ProcessAsync(Guid rawDocumentId)
+        public async Task<ProcessingResult> ProcessAsync(Guid rawDocumentId, string? tag = null)
         {
             // Get Raw Document
             var rawDocument = await _rawDocumentRepository.GetByIdAsync(rawDocumentId);
@@ -56,7 +56,7 @@ namespace StudyBuddy.BLL.Services
                 {
                     rawDocument.StoredFile = storedFile; // Since you loaded the file separately, you're simply assigning it to the navigation property before passing the document to the service.
 
-                    await _knowledgeService.StoreAsync(rawDocument, result);
+                    await _knowledgeService.StoreAsync(rawDocument, result, tag);
                 }
                 Console.WriteLine("========== Extracted Text ==========");
                 Console.WriteLine(result.ExtractedText);

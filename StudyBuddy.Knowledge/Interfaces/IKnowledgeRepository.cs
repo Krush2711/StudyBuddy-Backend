@@ -8,7 +8,10 @@ namespace StudyBuddy.Knowledge.Interfaces
         Task<KnowledgeDocument> CreateAsync(KnowledgeDocument document);
         Task<KnowledgeDocument?> GetByIdAsync(Guid id);
         Task UpdateAnalysisAsync(Guid rawDocumentId, DocumentAnalysisResponseDto analysis);
-        Task<List<KnowledgeDocument>> GetByUserAsync(Guid userId);
+        Task<List<KnowledgeDocument>> GetByUserAsync(
+            Guid userId,
+            DateTime? fromUtc = null,
+            string? subjectOrTag = null);
         Task DeleteAsync(Guid id);
         Task DeleteByUserAsync(Guid userId);
     }

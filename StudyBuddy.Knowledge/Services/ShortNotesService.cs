@@ -19,7 +19,8 @@ public class ShortNotesService : IShortNotesService
     }
 
     public async Task GenerateAsync(
-        DocumentAnalysisRequestDto request)
+        DocumentAnalysisRequestDto request,
+        string? tag = null)
     {
         // Call FastAPI
         var response =
@@ -32,6 +33,8 @@ public class ShortNotesService : IShortNotesService
             UserId = response.UserId,
             RawDocumentId = response.RawDocumentId,
             FileName = response.FileName,
+
+            Tag = tag?.Trim() ?? string.Empty,
 
             Title = response.Title,
             Summary = response.Summary,
@@ -59,9 +62,12 @@ public class ShortNotesService : IShortNotesService
         await _repository.CreateAsync(document);
     }
 
-    public async Task<List<ShortNotesDocument>> GetByUserAsync(Guid userId)
+    public async Task<List<ShortNotesDocument>> GetByUserAsync(
+        Guid userId,
+        DateTime? fromUtc = null,
+        string? subjectOrTag = null)
     {
-        return await _repository.GetByUserAsync(userId);
+        return await _repository.GetByUserAsync(userId, fromUtc, subjectOrTag);
     }
 
     public async Task DeleteByUserAsync(Guid userId)

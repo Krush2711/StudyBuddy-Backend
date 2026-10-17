@@ -6,7 +6,10 @@ namespace StudyBuddy.Knowledge.Interfaces
     {
         Task CreateAsync(DetailedNotesDocument document);
         Task<DetailedNotesDocument?> GetByRawDocumentIdAsync(Guid rawDocumentId);
-        Task<List<DetailedNotesDocument>> GetByUserAsync(Guid userId);
+        Task<List<DetailedNotesDocument>> GetByUserAsync(
+            Guid userId,
+            DateTime? fromUtc = null,
+            string? subjectOrTag = null);
         Task DeleteAsync(Guid id);
         Task DeleteByUserAsync(Guid userId);
     }

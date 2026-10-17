@@ -80,7 +80,7 @@ namespace StudyBuddy.BLL.Services
             };
 
             await _rawRepository.AddAsync(rawDocument);
-            await _documentProcessingService.ProcessAsync(rawDocument.Id);
+            await _documentProcessingService.ProcessAsync(rawDocument.Id, request.Subject);
             rawDocument.ProcessingStatus = "Completed";
 
 

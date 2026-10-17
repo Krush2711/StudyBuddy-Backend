@@ -40,10 +40,31 @@ namespace StudyBuddy.Knowledge.Repositories
             await _collection.DeleteOneAsync(x => x.Id == id);
         }
 
-        public async Task<List<DetailedNotesDocument>> GetByUserAsync(Guid userId)
+        public async Task<List<DetailedNotesDocument>> GetByUserAsync(
+            Guid userId,
+            DateTime? fromUtc = null,
+            string? subjectOrTag = null)
         {
+            var filters = new List<FilterDefinition<DetailedNotesDocument>>
+            {
+                Builders<DetailedNotesDocument>.Filter.Eq(x => x.UserId, userId)
+            };
+
+            if (fromUtc.HasValue)
+            {
+                filters.Add(Builders<DetailedNotesDocument>.Filter
+                    .Gte(x => x.CreatedAt, fromUtc.Value));
+            }
+
+            if (!string.IsNullOrWhiteSpace(subjectOrTag))
+            {
+                filters.Add(Builders<DetailedNotesDocument>.Filter
+                    .Eq(x => x.Tag, subjectOrTag));
+            }
+
             return await _collection
-                .Find(x => x.UserId == userId)
+                .Find(Builders<DetailedNotesDocument>.Filter.And(filters))
+                .SortByDescending(x => x.CreatedAt)
                 .ToListAsync();
         }
 

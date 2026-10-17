@@ -7,7 +7,7 @@ namespace StudyBuddy.BLL.Interfaces
 {
     public interface IDocumentProcessingService
     {
-        Task<ProcessingResult> ProcessAsync(Guid rawDocumentId);
+        Task<ProcessingResult> ProcessAsync(Guid rawDocumentId, string? tag = null);
 
     }
 }

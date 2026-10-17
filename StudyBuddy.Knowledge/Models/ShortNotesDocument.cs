@@ -15,6 +15,9 @@ public class ShortNotesDocument
 
     public string FileName { get; set; } = string.Empty;
 
+    // Optional user-supplied subject/tag from ingestion.
+    public string Tag { get; set; } = string.Empty;
+
     public string Title { get; set; } = string.Empty;
 
     public string Summary { get; set; } = string.Empty;
