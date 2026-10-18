@@ -4,11 +4,11 @@ namespace StudyBuddy.BLL.Interfaces
 {
     public interface IFileStorageService
     {
-        Task<StoredFileResultDto> SaveAsync(
-            Stream stream,
-            string fileName,
-            string contentType);
-
+        Task<StoredFileResultDto> SaveAsync(Guid userId,
+       Guid documentId,
+       Stream stream,
+       string fileName,
+       string contentType);
         Task DeleteAsync(string filePath);
     }
 }

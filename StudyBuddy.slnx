@@ -6,4 +6,5 @@
   <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Knowledge/StudyBuddy.Knowledge.csproj" Id="a9f7374a-2787-45a7-8412-e762e72577f1" />
   <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Models/StudyBuddy.Models.csproj" />
   <Project Path="D:/kanini/Study--Buddy/Backend/StudyBuddy/StudyBuddy.Processor/StudyBuddy.Processor.csproj" Id="81b92916-32b9-4951-8fcf-869ce7f80479" />
+  <Project Path="StudyBuddy.DAL.PostgreSQL/StudyBuddy.DAL.PostgreSQL.csproj" />
 </Solution>

@@ -31,6 +31,7 @@
     <ProjectReference Include="..\StudyBuddy.Knowledge\StudyBuddy.Knowledge.csproj" />
     <ProjectReference Include="..\StudyBuddy.Models\StudyBuddy.Models.csproj" />
     <ProjectReference Include="..\StudyBuddy.Processor\StudyBuddy.Processor.csproj" />
+    <ProjectReference Include="..\StudyBuddy.DAL.PostgreSQL\StudyBuddy.DAL.PostgreSQL.csproj" />
   </ItemGroup>
 
 </Project>

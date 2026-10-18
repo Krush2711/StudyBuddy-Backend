@@ -29,6 +29,7 @@ namespace StudyBuddy.BLL.Services
             _geminiApiKeyProvider = geminiApiKeyProvider;
         }
 
+
         public async Task<RawDocumentResponseDto> UploadAsync(
             Guid userId,
             UploadRawDocumentDto request)
@@ -36,21 +37,24 @@ namespace StudyBuddy.BLL.Services
             if (request.FileStream == null)
                 throw new Exception("File stream is empty.");
 
-            // Fail before saving anything if the user has no Gemini key: the
-            // ingestion pipeline needs it for summarization and notes.
             var geminiApiKey =
                 await _geminiApiKeyProvider.GetApiKeyAsync(userId);
 
             if (string.IsNullOrWhiteSpace(geminiApiKey))
                 throw new GeminiApiKeyMissingException();
 
-            // Save physical file
+            // Generate one ID for both Cloudinary and RawDocument.
+            var documentId = Guid.NewGuid();
+
+            // Upload to the authenticated user's Cloudinary folder.
             var fileResult = await _fileStorageService.SaveAsync(
+                userId,
+                documentId,
                 request.FileStream,
                 request.FileName,
                 request.ContentType);
 
-            // Create StoredFile entity
+            // Save file metadata.
             var storedFile = new StoredFile
             {
                 Id = Guid.NewGuid(),
@@ -60,16 +64,16 @@ namespace StudyBuddy.BLL.Services
                 ContentType = fileResult.ContentType,
                 FileExtension = fileResult.FileExtension,
                 FileSize = fileResult.FileSize,
-                StorageProvider = "Local",
+                StorageProvider = "Cloudinary",
                 CreatedAt = DateTime.UtcNow
             };
 
             await _storedFileRepository.AddAsync(storedFile);
 
-            // Create RawDocument
+            // Create the document using the same ID as the Cloudinary asset.
             var rawDocument = new RawDocument
             {
-                Id = Guid.NewGuid(),
+                Id = documentId,
                 UserId = userId,
 
                 Title = string.IsNullOrWhiteSpace(request.Title)
@@ -77,26 +81,22 @@ namespace StudyBuddy.BLL.Services
                     : request.Title,
 
                 Description = request.Description,
-
                 SourceType = request.SourceType,
-
                 StoredFileId = storedFile.Id,
-
                 UploadedAt = DateTime.UtcNow,
-
                 LearningDate = request.LearningDate ?? DateTime.UtcNow,
-
                 ProcessingStatus = "Pending",
-
                 CreatedAt = DateTime.UtcNow,
-
                 UpdatedAt = DateTime.UtcNow
             };
 
             await _rawRepository.AddAsync(rawDocument);
-            await _documentProcessingService.ProcessAsync(rawDocument.Id, request.Subject);
-            rawDocument.ProcessingStatus = "Completed";
 
+            await _documentProcessingService.ProcessAsync(
+                rawDocument.Id,
+                request.Subject);
+
+            rawDocument.ProcessingStatus = "Completed";
 
             return new RawDocumentResponseDto
             {
@@ -109,4 +109,4 @@ namespace StudyBuddy.BLL.Services
             };
         }
     }
-}
+    }
