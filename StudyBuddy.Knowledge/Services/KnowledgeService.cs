@@ -45,6 +45,7 @@ namespace StudyBuddy.Knowledge.Services
                 // even if the AI analysis later fails or returns an empty subject.
                 Tag = tag?.Trim() ?? string.Empty,
                 Subject = tag?.Trim() ?? string.Empty,
+                LearningDate = rawDocument.LearningDate,
                 CreatedAt = DateTime.UtcNow
             };
 

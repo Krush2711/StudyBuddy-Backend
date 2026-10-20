@@ -1,17 +1,23 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.DataProtection;
-using StudyBuddy.API.Authentication;
-using StudyBuddy.API.Security;
-using StudyBuddy.API.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using StudyBuddy.Ai.Interfaces;
+using StudyBuddy.Ai.Services;
+using StudyBuddy.API.Authentication;
 using StudyBuddy.API.Middleware;
+using StudyBuddy.API.Security;
 using StudyBuddy.API.Seeding;
+using StudyBuddy.API.Swagger;
 using StudyBuddy.BLL.Interfaces;
 using StudyBuddy.BLL.Interfaces.Auth;
 using StudyBuddy.BLL.Services;
@@ -31,12 +37,9 @@ using StudyBuddy.Processor.Factory;
 using StudyBuddy.Processor.Interfaces;
 using StudyBuddy.Processor.Processors;
 using StudyBuddy.Processor.Services;
-using StudyBuddy.Ai.Services;
-using StudyBuddy.Ai.Interfaces;
 using System.Text;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Microsoft.AspNetCore.HttpOverrides;
+
 namespace StudyBuddy.API
 {
     public class Program
@@ -63,6 +66,7 @@ namespace StudyBuddy.API
             });
             // Add services to the container.
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -168,7 +172,18 @@ namespace StudyBuddy.API
                          Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                  };
              })
-             .AddCookie()
+             .AddCookie(options =>
+             {
+                 // The Google popup sets this cookie on the API's origin, and the
+                 // SPA then reads it back with a cross-site fetch
+                 // (credentials: 'include') in production. SameSite=Lax (the
+                 // browser default) is NOT sent on cross-site fetches, which
+                 // would leave the exchange returning 400 forever. None+Secure
+                 // is required for that flow; dev is unaffected because the
+                 // exchange goes through the same-origin Vite proxy there.
+                 options.Cookie.SameSite = SameSiteMode.None;
+                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+             })
              .AddGoogle(options =>
              {
                  options.ClientId =
@@ -191,6 +206,22 @@ namespace StudyBuddy.API
                     policy.RequireRole(AdminSeeder.AdminRole));
             });
 
+            // CORS: the SPA calls this API from the browser, both locally (dev)
+            // and on the deployed frontend (prod). AllowCredentials() is required
+            // because the external (Google) sign-in round-trip relies on the auth
+            // cookie — and it cannot be combined with AllowAnyOrigin(), so the
+            // allowed origins are listed explicitly.
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Spa", policy => policy
+                    .WithOrigins(
+                        "https://krushnas2.studybuddy.blitz.cloud",
+                        "http://localhost:5173",
+                        "http://localhost:5273")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
 
             var app = builder.Build();
 
@@ -199,11 +230,29 @@ namespace StudyBuddy.API
                 app.Configuration,
                 app.Environment);
 
-                        app.UseMiddleware<GlobalExceptionMiddleware>();
-                        // Configure the HTTP request pipeline.
-                      
-             app.UseSwagger();
-             app.UseSwaggerUI();
+            var forwardedHeadersOptions = new ForwardedHeadersOptions
+            {
+                // XForwardedHost lets Url/host-based redirects (e.g. the Google
+                // sign-in redirect) resolve to the real public host behind the proxy
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+            };
+            forwardedHeadersOptions.KnownNetworks.Clear();   // ← still missing
+            forwardedHeadersOptions.KnownProxies.Clear();
+
+            // Blitz Cloud's proxy IP isn't known/fixed, so clear these
+            // to allow forwarded headers from any upstream proxy
+
+            forwardedHeadersOptions.KnownProxies.Clear();
+
+            app.UseForwardedHeaders(forwardedHeadersOptions);
+            app.UseCors("Spa");
+            app.UseMiddleware<GlobalExceptionMiddleware>();
+             // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
 
 
             // replace:  app.UseHttpsRedirection();
@@ -211,6 +260,7 @@ namespace StudyBuddy.API
             {
                 app.UseHttpsRedirection();
             }
+
 
 
             app.UseAuthentication();

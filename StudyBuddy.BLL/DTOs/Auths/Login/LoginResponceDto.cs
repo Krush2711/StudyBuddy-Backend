@@ -13,5 +13,11 @@ namespace StudyBuddy.BLL.DTOs.Auths.Login
         public string Email { get; set; } = string.Empty;
 
         public string Token { get; set; } = string.Empty;
+
+        /// <summary>Long-lived token exchanged at POST /api/refresh.</summary>
+        public string RefreshToken { get; set; } = string.Empty;
+
+        /// <summary>Access-token lifetime in seconds.</summary>
+        public int ExpiresIn { get; set; }
     }
 }

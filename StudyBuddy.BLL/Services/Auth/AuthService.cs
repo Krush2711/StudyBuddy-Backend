@@ -21,11 +21,16 @@ namespace StudyBuddy.BLL.Services.Add
     public class AuthService : IAuthService
     {
         private readonly IAuthRepository _authRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly ITokenService _tokenService;
-        public AuthService(IAuthRepository repository, ITokenService tokenService)
+        public AuthService(
+            IAuthRepository repository,
+            IRefreshTokenRepository refreshTokenRepository,
+            ITokenService tokenService)
         {
             _authRepository = repository;
+            _refreshTokenRepository = refreshTokenRepository;
             _passwordHasher = new PasswordHasher<User>();
             _tokenService = tokenService;
         }
@@ -65,13 +70,7 @@ namespace StudyBuddy.BLL.Services.Add
 
             if (user != null)
             {
-                return (new LoginResponceDto
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    Token = _tokenService.GenerateToken(user)
-                });
+                return await IssueSessionAsync(user);
             }
 
             var userbymail = await _authRepository.GetUserByEmailAsync(email);
@@ -84,13 +83,7 @@ namespace StudyBuddy.BLL.Services.Add
 
                 await _authRepository.UpdateUserAsync(userbymail);
 
-                return new LoginResponceDto
-                {
-                    Id = userbymail.Id,
-                    FullName = userbymail.FullName,
-                    Email = userbymail.Email,
-                    Token = _tokenService.GenerateToken(userbymail)
-                };
+                return await IssueSessionAsync(userbymail);
             }
 
             // First time Google login - create a new user
@@ -109,13 +102,7 @@ namespace StudyBuddy.BLL.Services.Add
 
             await _authRepository.CreateUSerAsync(newUser);
 
-            return new LoginResponceDto
-            {
-                Id = newUser.Id,
-                FullName = newUser.FullName,
-                Email = newUser.Email,
-                Token = _tokenService.GenerateToken(newUser)
-            };
+            return await IssueSessionAsync(newUser);
         }
 
         public async Task<LoginResponceDto> LoginAsync(LoginRequestDto request)
@@ -137,13 +124,130 @@ namespace StudyBuddy.BLL.Services.Add
             {
                 throw new InvalidCredentialsException();
             }
-            return (new LoginResponceDto
+
+            return await IssueSessionAsync(user);
+        }
+
+        /// <summary>
+        /// Rotates a refresh token into a fresh access/refresh pair.
+        ///
+        /// Presenting an already-used token is treated as a leak: the whole
+        /// family is revoked rather than silently re-issued, so a stolen token
+        /// cannot be used alongside the legitimate session indefinitely.
+        /// </summary>
+        public async Task<LoginResponceDto> RefreshAsync(string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new InvalidRefreshTokenException();
+            }
+
+            var hash = _tokenService.HashRefreshToken(refreshToken);
+
+            var stored = await _refreshTokenRepository.GetByHashAsync(hash);
+
+            if (stored == null)
+            {
+                throw new InvalidRefreshTokenException();
+            }
+
+            if (stored.RevokedAt != null)
+            {
+                // Replay of a token we already rotated or revoked.
+                await _refreshTokenRepository.RevokeAllForUserAsync(
+                    stored.UserId,
+                    "replay-detected");
+                throw new InvalidRefreshTokenException();
+            }
+
+            if (stored.ExpiresAt <= DateTime.UtcNow)
+            {
+                throw new InvalidRefreshTokenException();
+            }
+
+            var user = await _authRepository.GetUserByIdAsync(stored.UserId);
+
+            if (user == null || !user.Isactive)
+            {
+                await _refreshTokenRepository.RevokeAllForUserAsync(
+                    stored.UserId,
+                    "user-inactive");
+                throw new InvalidRefreshTokenException();
+            }
+
+            var session = await IssueSessionAsync(user);
+
+            // Link the token we just consumed to its replacement, then revoke it.
+            var replacementHash = _tokenService.HashRefreshToken(session.RefreshToken);
+            var replacement = await _refreshTokenRepository.GetByHashAsync(replacementHash);
+
+            stored.RevokedAt = DateTime.UtcNow;
+            stored.RevokedReason = "rotated";
+            stored.ReplacedByTokenId = replacement?.Id;
+
+            await _refreshTokenRepository.UpdateAsync(stored);
+
+            return session;
+        }
+
+        public async Task LogoutAsync(string? refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return;
+            }
+
+            var stored = await _refreshTokenRepository.GetByHashAsync(
+                _tokenService.HashRefreshToken(refreshToken));
+
+            // Idempotent: an unknown or already-revoked token is not an error.
+            if (stored == null || stored.RevokedAt != null)
+            {
+                return;
+            }
+
+            stored.RevokedAt = DateTime.UtcNow;
+            stored.RevokedReason = "logout";
+
+            await _refreshTokenRepository.UpdateAsync(stored);
+        }
+
+        /// <summary>
+        /// Mints an access token plus a brand-new refresh token for a user.
+        /// Every login of any kind ends up here.
+        /// </summary>
+        private async Task<LoginResponceDto> IssueSessionAsync(User user)
+        {
+            var accessToken = _tokenService.GenerateToken(user);
+
+            var secrets = await IssueRefreshTokenAsync(user.Id);
+
+            return new LoginResponceDto
             {
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email,
-                Token = _tokenService.GenerateToken(user)
-            });
+                Token = accessToken,
+                RefreshToken = secrets.RawToken,
+                ExpiresIn = _tokenService.AccessTokenExpiresInSeconds
+            };
+        }
+
+        private async Task<(Guid Id, string RawToken)> IssueRefreshTokenAsync(Guid userId)
+        {
+            var rawToken = _tokenService.GenerateRefreshToken();
+
+            var entity = new RefreshToken
+            {
+                UserId = userId,
+                TokenHash = _tokenService.HashRefreshToken(rawToken),
+                ExpiresAt = _tokenService.GetRefreshTokenExpiryUtc(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _refreshTokenRepository.CreateAsync(entity);
+
+            return (entity.Id, rawToken);
         }
     }
 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
@@ -19,6 +20,9 @@ namespace StudyBuddy.BLL.Services.Auth
         public TokenService(IOptions<JwtSettings> options) { 
                         _jwtSettings = options.Value;
         }
+
+        public int AccessTokenExpiresInSeconds =>
+            Math.Max(1, _jwtSettings.ExpiryInMinutes) * 60;
 
         public string GenerateToken(User user)
         {
@@ -51,6 +55,37 @@ namespace StudyBuddy.BLL.Services.Auth
 
             return new JwtSecurityTokenHandler().WriteToken(token);
 
+        }
+
+        /// <summary>
+        /// 256 bits from a CSPRNG, Base64url-encoded. Deliberately opaque — it
+        /// carries no claims, so it can be revoked server-side, which a JWT
+        /// cannot be.
+        /// </summary>
+        public string GenerateRefreshToken()
+        {
+            var bytes = RandomNumberGenerator.GetBytes(32);
+
+            return Convert.ToBase64String(bytes)
+                .Replace('+', '-')
+                .Replace('/', '_')
+                .TrimEnd('=');
+        }
+
+        public string HashRefreshToken(string token)
+        {
+            // SHA-256 is right here (not a password hash): the input is already
+            // high-entropy random, so slow KDFs would only add latency.
+            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+
+            return Convert.ToBase64String(hash);
+        }
+
+        public DateTime GetRefreshTokenExpiryUtc()
+        {
+            var days = Math.Max(1, _jwtSettings.RefreshTokenExpiryInDays);
+
+            return DateTime.UtcNow.AddDays(days);
         }
     }
 }

@@ -34,6 +34,13 @@ namespace StudyBuddy.API.Middleware
                     HttpStatusCode.Unauthorized,
                     ex.Message);
             }
+            catch (InvalidRefreshTokenException ex)
+            {
+                await HandleExceptionAsync(
+                    context,
+                    HttpStatusCode.Unauthorized,
+                    ex.Message);
+            }
             catch (UserNotFoundException ex)
             {
                 await HandleExceptionAsync(

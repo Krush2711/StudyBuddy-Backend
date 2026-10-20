@@ -30,6 +30,11 @@ namespace StudyBuddy.Knowledge.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // The calendar day the user picked at upload time (Kind=Utc). Nullable
+        // so documents stored before this field existed deserialize as null
+        // instead of crashing the list endpoint.
+        public DateTime? LearningDate { get; set; }
+
         public string Summary { get; set; } = string.Empty;
 
         public string Subject { get; set; } = string.Empty;

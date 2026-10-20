@@ -37,6 +37,11 @@ namespace StudyBuddy.DAL.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email); // getting user 
         }
+
+        public async Task<User?> GetUserByIdAsync(Guid id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
         public async Task<bool> CreateUserAsync(User user)
         {
             await _context.Users.AddAsync(user);

@@ -39,13 +39,37 @@ namespace StudyBuddy.API.Controllers
             var responce = await _authService.LoginAsync(request);
             return Ok(responce);
         }
+
+        /// <summary>
+        /// Exchanges a refresh token for a new access/refresh pair. No [Authorize]:
+        /// the caller's access token has usually already expired by design.
+        /// </summary>
+        [HttpPost("/api/refresh")]
+        public async Task<IActionResult> Refresh(RefreshRequestDto request)
+        {
+            var response = await _authService.RefreshAsync(request.RefreshToken);
+            return Ok(response);
+        }
+
+        /// <summary>Revokes a refresh token. Always 204, even for unknown values.</summary>
+        [HttpPost("/api/logout")]
+        public async Task<IActionResult> Logout(RefreshRequestDto request)
+        {
+            await _authService.LogoutAsync(request.RefreshToken);
+            return NoContent();
+        }
         [HttpGet("/api/login-google")]
         public IActionResult GoogleLogin()
         {
+            // Build the post-login redirect explicitly from the authorized request
+            // (ForwardedHeaders maps X-Forwarded-Proto / X-Forwarded-Host to the
+            // real public scheme/host). Url.Action() alone produces a relative
+            // path that resolves incorrectly behind Blitz Cloud's reverse proxy.
+            var redirectUri = $"{Request.Scheme}://{Request.Host}/api/auth/google-response";
+
             var properties = new AuthenticationProperties
             {
-
-                RedirectUri = Url.Action(nameof(GoogleResponse))
+                RedirectUri = redirectUri
             };
 
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);

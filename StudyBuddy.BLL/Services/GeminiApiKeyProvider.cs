@@ -21,20 +21,22 @@ namespace StudyBuddy.BLL.Services
             _protector = protector;
         }
 
+
         public async Task<string?> GetApiKeyAsync(Guid userId)
         {
-            if (_cache.TryGetValue(userId, out var cached))
-            {
-                return cached;
-            }
-
+            // Read the user's currently stored plaintext key.
             var user = await _userRepository.GetUserByIdAsync(userId);
 
-            var apiKey = _protector.Unprotect(user?.GeminiApiKey);
+            var apiKey = user?.GeminiApiKey;
 
-            _cache[userId] = apiKey;
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                _cache.Remove(userId);
+                return null;
+            }
 
             return apiKey;
         }
+
     }
 }

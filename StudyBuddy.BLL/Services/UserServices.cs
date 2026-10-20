@@ -115,7 +115,7 @@ namespace StudyBuddy.BLL.Services
             }
 
             // Encrypted at rest; the plaintext key is never persisted or returned.
-            user.GeminiApiKey = _geminiApiKeyProtector.Protect(apiKey);
+            user.GeminiApiKey = apiKey;
             user.UpdatedAt = DateTime.UtcNow;
 
             await _userRepository.UpdateUserAsync(user);

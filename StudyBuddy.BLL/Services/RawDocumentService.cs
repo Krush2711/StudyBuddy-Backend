@@ -84,7 +84,13 @@ namespace StudyBuddy.BLL.Services
                 SourceType = request.SourceType,
                 StoredFileId = storedFile.Id,
                 UploadedAt = DateTime.UtcNow,
-                LearningDate = request.LearningDate ?? DateTime.UtcNow,
+                // LearningDate comes from an <input type="date">, so it binds as
+                // Kind=Unspecified. Npgsql rejects Unspecified for timestamptz,
+                // and ToUniversalTime() would shift the calendar day for any
+                // server west of UTC — SpecifyKind keeps the picked date intact.
+                LearningDate = request.LearningDate.HasValue
+                    ? DateTime.SpecifyKind(request.LearningDate.Value.Date, DateTimeKind.Utc)
+                    : DateTime.UtcNow,
                 ProcessingStatus = "Pending",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

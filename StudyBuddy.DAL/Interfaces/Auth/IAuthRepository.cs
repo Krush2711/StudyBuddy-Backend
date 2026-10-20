@@ -12,6 +12,7 @@ namespace StudyBuddy.DAL.Interfaces.Auth
         Task<bool> UpdateUserAsync(User user);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByGoogleIdAsync(string googleId);
+        Task<User?> GetUserByIdAsync(Guid id);
 
     }
 }
